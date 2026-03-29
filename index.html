@@ -1,0 +1,2170 @@
+# polygarden<!DOCTYPE html>
+<html lang="ko" id="html-root" class="theme-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POLYGARDEN:demo</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23166534' d='M15 8h2v18h-2z'/%3E%3Cpath fill='%2322c55e' d='M16 14c-4-5-10-9-14-6 3 9 9 11 14 10z'/%3E%3Cpath fill='%234ade80' d='M16 14c4-5 10-9 14-6-3 9-9 11-14 10z'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      html,
+      body {
+        font-family:
+          "Inter",
+          "Noto Sans KR",
+          ui-sans-serif,
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* 정삼각형에 가깝게: 밑변=너비, 높이=√3/2 × 너비 */
+      .shape-tri-eq {
+        width: 2rem;
+        height: calc(2rem * 0.8660254);
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        border-radius: 2px;
+      }
+      .shape-tri-eq-sm {
+        width: 0.75rem;
+        height: calc(0.75rem * 0.8660254);
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        border-radius: 2px;
+      }
+      .shape-tri-eq-codex {
+        width: 2rem;
+        height: calc(2rem * 0.8660254);
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body
+    id="body-root"
+    class="theme-dark-body m-0 min-h-screen bg-[#050505] text-white antialiased transition-colors duration-200"
+  >
+    <!-- Tailwind 샘플 (동적 클래스 생성용) -->
+    <div class="hidden" aria-hidden="true">
+      <div
+        class="grid grid-cols-2 grid-rows-2 grid-cols-3 grid-rows-3 grid-cols-4 grid-rows-4 grid-cols-5 grid-rows-5"
+        aria-hidden="true"
+      ></div>
+      <div
+        id="cell-class-sample"
+        class="w-[60px] h-[60px] box-border border-r border-b border-gray-600 shrink-0 flex items-center justify-center cursor-pointer select-none group relative"
+      ></div>
+      <span class="block rounded-full bg-white w-8 h-8"></span>
+      <span class="block bg-white w-7 h-7 rounded-sm"></span>
+      <span class="block bg-white shape-tri-eq"></span>
+      <span class="block rounded-full bg-white w-3 h-3"></span>
+      <span class="block bg-white w-2.5 h-2.5 rounded-sm"></span>
+      <span class="block bg-white shape-tri-eq-sm"></span>
+      <div
+        class="ring-2 ring-white/80 shadow-[0_0_14px_rgba(255,255,255,0.45)] border-r border-b border-white/50 z-[1] relative"
+      ></div>
+      <div
+        class="pointer-events-auto cursor-pointer p-2 z-[6] flex items-center justify-center"
+      ></div>
+      <div class="scatter-hit flex items-center justify-center rounded-md p-3"></div>
+      <span class="block bg-white shape-tri-eq-codex"></span>
+      <span
+        class="rounded-full w-3 h-3 shrink-0 bg-emerald-400 ring-1 ring-emerald-300/80 shadow-[0_0_8px_rgba(52,211,153,0.55)]"
+      ></span>
+      <span
+        class="rounded-full w-3 h-3 shrink-0 bg-amber-400 ring-1 ring-amber-200/90 shadow-[0_0_10px_rgba(251,191,36,0.72)]"
+      ></span>
+      <span
+        class="h-8 w-8 shrink-0 rounded-full bg-emerald-400 ring-1 ring-emerald-300/70 shadow-[0_0_12px_rgba(52,211,153,0.45)]"
+      ></span>
+      <span
+        class="h-8 w-8 shrink-0 rounded-full bg-amber-400 ring-1 ring-amber-200/85"
+      ></span>
+      <span
+        class="h-8 w-8 shrink-0 rounded-sm bg-amber-400 ring-1 ring-amber-200/85 shadow-[0_0_14px_rgba(251,191,36,0.55)]"
+      ></span>
+      <span
+        class="h-3 w-3 shrink-0 rounded-sm bg-amber-400 ring-1 ring-amber-200/85"
+      ></span>
+      <div class="shadow-[inset_0_0_0_2px_rgba(52,211,153,0.55)]"></div>
+      <span
+        class="h-8 w-8 shrink-0 bg-emerald-400 shape-tri-eq-codex ring-1 ring-emerald-300/70"
+      ></span>
+      <div
+        class="fixed z-[100] invisible opacity-0 pointer-events-none rounded-lg border px-3 py-2 text-xs shadow-xl transition-opacity"
+      ></div>
+    </div>
+
+    <div
+      class="flex min-h-screen flex-col lg:flex-row lg:items-stretch"
+    >
+      <!-- 왼쪽: 인벤토리 + 바깥 토글 -->
+      <div
+        id="inventory-shell"
+        class="sidebar-root order-2 flex w-full shrink-0 flex-row items-stretch border-t border-white/10 bg-[#0a0a0a] lg:order-1 lg:w-auto lg:min-h-screen lg:max-h-screen lg:flex-shrink-0 lg:border-r lg:border-t-0"
+      >
+        <aside
+          id="inventory-aside"
+          class="flex min-h-0 min-w-0 flex-1 flex-col justify-center overflow-hidden p-4 text-white transition-[width,padding] duration-300 ease-out lg:w-72 lg:flex-none lg:p-4"
+        >
+          <div id="inventory-content" class="min-w-0 w-full">
+            <div
+              class="w-full rounded-xl border border-white/10 bg-[#111] p-4 shadow-lg ring-1 ring-white/5"
+              aria-live="polite"
+              aria-label="인벤토리"
+            >
+              <h2
+                class="mb-3 border-b border-white/10 pb-2 text-xs font-semibold uppercase tracking-widest text-white/50"
+              >
+                인벤토리
+              </h2>
+              <p class="mb-3 text-[11px] text-white/40">획득한 도형 개수</p>
+              <div
+                id="player-inventory-ui"
+                class="flex flex-col gap-2 text-sm"
+              >
+                <div
+                  id="inv-row-circle"
+                  class="hidden flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="h-3 w-3 rounded-full bg-white ring-1 ring-white/30"
+                      ></span></span
+                    >원</span
+                  >
+                  <strong id="inv-count-circle" class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+                <div
+                  id="inv-row-square"
+                  class="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5 hidden"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="h-3 w-3 rounded-sm bg-white ring-1 ring-white/25"
+                      ></span></span
+                    >사각형</span
+                  >
+                  <strong id="inv-count-square" class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+                <div
+                  id="inv-row-triangle"
+                  class="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5 hidden"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="block shrink-0 bg-white shape-tri-eq-sm"
+                      ></span></span
+                    >삼각형</span
+                  >
+                  <strong
+                    id="inv-count-triangle"
+                    class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+                <div
+                  id="inv-row-circle-green"
+                  class="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5 hidden"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="h-3 w-3 rounded-full bg-emerald-400 ring-1 ring-emerald-300/70"
+                      ></span></span
+                    >원:초록</span
+                  >
+                  <strong
+                    id="inv-count-circle-green"
+                    class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+                <div
+                  id="inv-row-triangle-green"
+                  class="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5 hidden"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="block shrink-0 bg-emerald-400 shape-tri-eq-sm ring-1 ring-emerald-300/70"
+                      ></span></span
+                    >삼각형:초록</span
+                  >
+                  <strong
+                    id="inv-count-triangle-green"
+                    class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+                <div
+                  id="inv-row-circle-gold"
+                  class="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5 hidden"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="h-3 w-3 rounded-full bg-amber-400 ring-1 ring-amber-200/85"
+                      ></span></span
+                    >원:황금</span
+                  >
+                  <strong
+                    id="inv-count-circle-gold"
+                    class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+                <div
+                  id="inv-row-square-gold"
+                  class="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2 ring-1 ring-white/5 hidden"
+                >
+                  <span class="flex items-center gap-2.5 text-white/70"
+                    ><span
+                      class="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                      aria-hidden="true"
+                      ><span
+                        class="h-3 w-3 rounded-sm bg-amber-400 ring-1 ring-amber-200/85"
+                      ></span></span
+                    >사각형:황금</span
+                  >
+                  <strong
+                    id="inv-count-square-gold"
+                    class="text-lg text-white tabular-nums"
+                    >0</strong
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+        <button
+          type="button"
+          id="inventory-toggle"
+          class="flex shrink-0 items-center justify-center self-center rounded-md p-2 text-white/55 transition hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+          aria-expanded="true"
+          aria-controls="inventory-content"
+          aria-label="인벤토리 접기"
+        ></button>
+      </div>
+
+      <!-- 중앙: 게임 -->
+      <main
+        class="order-1 flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center gap-4 p-4 lg:order-2 lg:p-6"
+      >
+        <div
+          id="game-container"
+          class="relative flex h-[540px] w-[540px] max-w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-2xl ring-1 ring-white/5"
+          role="application"
+          aria-label="게임 영역"
+        >
+          <div
+            id="field-wrap"
+            class="relative max-w-full shrink-0 rounded-[3px]"
+            style="width: 120px; height: 120px"
+          >
+            <div
+              class="relative z-0 grid grid-cols-2 grid-rows-2 gap-0 border-t border-l border-gray-600"
+              id="game-grid"
+              aria-label="2x2 게임 그리드"
+            ></div>
+            <div
+              id="grid-scatter-layer"
+              class="pointer-events-none absolute inset-0 z-[5]"
+              aria-hidden="true"
+            ></div>
+          </div>
+        </div>
+        <div
+          id="grid-upgrade-ui"
+          class="flex w-full max-w-[min(96vw,480px)] flex-col items-center gap-1 text-center"
+        >
+          <button
+            type="button"
+            id="grid-upgrade-btn"
+            class="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:border-white/30 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            밭 확장
+          </button>
+          <p id="grid-upgrade-detail" class="text-[11px] leading-snug text-white/45"></p>
+        </div>
+      </main>
+
+      <!-- 오른쪽: 바깥 토글 + 도감 -->
+      <div
+        id="codex-shell"
+        class="sidebar-root order-3 flex w-full shrink-0 flex-row items-stretch border-t border-white/10 bg-[#0a0a0a] lg:order-3 lg:w-auto lg:min-h-screen lg:max-h-screen lg:flex-shrink-0 lg:border-l lg:border-t-0"
+      >
+        <button
+          type="button"
+          id="codex-toggle"
+          class="flex shrink-0 items-center justify-center self-center rounded-md p-2 text-white/55 transition hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+          aria-expanded="true"
+          aria-controls="codex-content"
+          aria-label="도감 접기"
+        ></button>
+        <aside
+          id="codex-aside"
+          class="flex min-h-0 min-w-0 flex-1 flex-col justify-start overflow-hidden p-4 text-white transition-[width,padding] duration-300 ease-out lg:w-80 lg:flex-none lg:min-h-0 lg:p-4"
+        >
+          <div
+            id="codex-content"
+            class="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden"
+          >
+            <div
+              class="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-xl border border-white/10 bg-[#111] p-4 shadow-lg ring-1 ring-white/5"
+              aria-label="도감"
+            >
+              <h2
+                class="mb-1 shrink-0 border-b border-white/10 pb-2 text-xs font-semibold uppercase tracking-widest text-white/50"
+              >
+                도감
+              </h2>
+              <p class="mb-3 shrink-0 text-[11px] text-white/40">
+                항목을 눌러 누적 수확 · 획득 경로 · 능력을 확인하세요
+              </p>
+              <div
+                id="codex-ui"
+                class="grid max-h-[min(100vh-14rem,60vh)] min-h-0 flex-1 grid-cols-1 content-start items-start gap-3 overflow-y-auto overscroll-y-contain pr-0.5 sm:grid-cols-1 lg:max-h-none [scrollbar-gutter:stable]"
+              ></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- 심기 선택: 보유 도형 종류·개수만 (셀 오른쪽 fixed) -->
+    <div
+      id="plant-select-panel"
+      class="fixed z-[90] hidden w-auto min-w-[140px] max-w-[200px] rounded-xl border border-white/15 bg-[#1a1a1a] p-2 shadow-xl ring-1 ring-white/10"
+      role="dialog"
+      aria-label="보유 씨앗"
+      aria-modal="true"
+    >
+      <span class="sr-only">보유 씨앗에서 심을 도형을 고르세요</span>
+      <p
+        class="mb-1.5 border-b border-white/10 pb-1.5 text-center text-[11px] font-medium text-white/85"
+      >
+        심을 수 있는 도형
+      </p>
+      <div id="plant-select-buttons" class="flex flex-col gap-1.5"></div>
+    </div>
+
+    <!-- 전역 툴팁 (그리드 셀 / 인벤토리 행 등) -->
+    <div
+      id="global-tooltip"
+      class="fixed z-[100] max-w-[min(92vw,300px)] rounded-xl border border-white/15 bg-[#141414] px-3 py-2.5 text-left text-xs text-white/95 shadow-2xl ring-1 ring-white/10 pointer-events-none opacity-0 transition-opacity duration-200 ease-out"
+      role="tooltip"
+    ></div>
+
+    <script>
+      (function () {
+        /**
+         * @typedef {null | "circle" | "square" | "triangle"} CellType
+         * @typedef {null | "circle_green" | "circle_gold" | "square_gold" | "triangle_green"} CellVariant
+         * @typedef {{ type: CellType, variant: CellVariant, growthTime: number, isReady: boolean, plantedAt: number | null, matureAt: number | null }} GridCell
+         */
+
+        /** @type {CellType[]} */
+        const SHAPE_TYPES = ["circle", "square", "triangle"];
+
+        const CELL_PX = 60;
+        const GRID_MAX_SIZE = 5;
+        /** @type {number} 현재 한 변 칸 수 */
+        let gridSize = 2;
+
+        /** 밭 확장 비용에 쓰이는 씨앗 키 순서 (기본 + 변이) */
+        const GRID_EXPAND_COST_KEYS = [
+          "circle",
+          "square",
+          "triangle",
+          "circle_green",
+          "circle_gold",
+          "square_gold",
+          "triangle_green",
+        ];
+
+        /**
+         * 확장 후 목표 한 변 칸 수(3~5)별 비용. 3 = 2×2→3×3, 4 = 3×3→4×4, 5 = 4×4→5×5
+         * @type {Record<number, Record<string, number>>}
+         */
+        const GRID_EXPAND_COST = {
+          3: {
+            circle: 2,
+            square: 1,
+            triangle: 0,
+            circle_green: 1,
+            circle_gold: 0,
+            square_gold: 0,
+            triangle_green: 0,
+          },
+          4: {
+            circle: 3,
+            square: 2,
+            triangle: 2,
+            circle_green: 1,
+            circle_gold: 1,
+            square_gold: 0,
+            triangle_green: 1,
+          },
+          5: {
+            circle: 5,
+            square: 4,
+            triangle: 3,
+            circle_green: 2,
+            circle_gold: 1,
+            square_gold: 1,
+            triangle_green: 1,
+          },
+        };
+
+        const GRID_COL_CLASS = [
+          "",
+          "",
+          "grid-cols-2",
+          "grid-cols-3",
+          "grid-cols-4",
+          "grid-cols-5",
+        ];
+        const GRID_ROW_CLASS = [
+          "",
+          "",
+          "grid-rows-2",
+          "grid-rows-3",
+          "grid-rows-4",
+          "grid-rows-5",
+        ];
+
+        /** 도형별 표시명·설명 (색상은 모두 흰색 통일) */
+        const SHAPE_META = {
+          circle: {
+            id: "circle",
+            name: "원",
+            nameEn: "Circle",
+            fillClass: "bg-white",
+            hex: "#ffffff",
+          },
+          square: {
+            id: "square",
+            name: "사각형",
+            nameEn: "Square",
+            fillClass: "bg-white",
+            hex: "#ffffff",
+          },
+          triangle: {
+            id: "triangle",
+            name: "삼각형",
+            nameEn: "Triangle",
+            fillClass: "bg-white",
+            hex: "#ffffff",
+          },
+        };
+
+        /** 성장 완료 시 셀 (모든 도형 동일 흰색 강조) */
+        const CELL_READY_CLASS =
+          "ring-2 ring-white/80 shadow-[0_0_14px_rgba(255,255,255,0.45)] border-r border-b border-white/50 z-[1] relative";
+
+        /** 활성 원:초록 상·하·좌·우 인접 칸 — 연한 초록 태두리(성장 완료 링과 동시에 쓰기 위해 inset shadow) */
+        const CELL_GREEN_AURA_NEIGHBOR_BORDER =
+          "shadow-[inset_0_0_0_2px_rgba(52,211,153,0.55)]";
+
+        /** @returns {GridCell} */
+        function createEmptyCell() {
+          return {
+            type: null,
+            variant: null,
+            growthTime: 0,
+            isReady: false,
+            plantedAt: null,
+            matureAt: null,
+          };
+        }
+
+        function createGridData() {
+          return Array.from({ length: gridSize }, () =>
+            Array.from({ length: gridSize }, () => createEmptyCell())
+          );
+        }
+
+        /** 변이 작물(심은 뒤) 필드 유지 시간 — 만료 시 보너스/기본 씨앗 드롭 */
+        const VARIANT_LIFESPAN_MS = 90_000;
+
+        /**
+         * @param {CellType} type
+         * @returns {number}
+         */
+        function growthTimeMsForCellType(type) {
+          if (type === "circle") return 20_000;
+          if (type === "square") return 30_000;
+          if (type === "triangle") return 40_000;
+          return 20_000;
+        }
+
+        /** @returns {number} 3 이상 5 이하 */
+        function randomInt3To5() {
+          return 3 + Math.floor(Math.random() * 3);
+        }
+
+        /** 심을 수 있는 씨앗 키 (기본 3종 + 변이) */
+        const PLANTABLE_KEYS = [
+          "circle",
+          "square",
+          "triangle",
+          "circle_green",
+          "circle_gold",
+          "square_gold",
+          "triangle_green",
+        ];
+
+        /** @param {string} seedKey */
+        function plantSpecFromSeedKey(seedKey) {
+          if (seedKey === "circle_green")
+            return { type: "circle", variant: "circle_green" };
+          if (seedKey === "circle_gold")
+            return { type: "circle", variant: "circle_gold" };
+          if (seedKey === "square_gold")
+            return { type: "square", variant: "square_gold" };
+          if (seedKey === "triangle_green")
+            return { type: "triangle", variant: "triangle_green" };
+          if (SHAPE_TYPES.includes(seedKey))
+            return { type: seedKey, variant: null };
+          return null;
+        }
+
+        /**
+         * @param {string} seedKey
+         */
+        function seedLabelKo(seedKey) {
+          if (seedKey === "circle_green") return "원:초록";
+          if (seedKey === "circle_gold") return "원:황금";
+          if (seedKey === "square_gold") return "사각형:황금";
+          if (seedKey === "triangle_green") return "삼각형:초록";
+          const m = SHAPE_META[seedKey];
+          return m ? m.name : seedKey;
+        }
+
+        /** 빈 칸 심기 패널: 변이 씨앗 이름 글씨색(도형 색과 대응) */
+        function plantSelectSeedLabelClass(seedKey) {
+          if (seedKey === "circle_green") return "font-medium text-emerald-400";
+          if (seedKey === "circle_gold" || seedKey === "square_gold")
+            return "font-medium text-amber-300";
+          if (seedKey === "triangle_green") return "font-medium text-emerald-400";
+          return "font-medium text-white";
+        }
+
+        /**
+         * @param {GridCell} cell
+         */
+        function plantedCellTitleKo(cell) {
+          if (!cell.type) return "";
+          if (cell.variant === "circle_green") return "원:초록";
+          if (cell.variant === "circle_gold") return "원:황금";
+          if (cell.variant === "square_gold") return "사각형:황금";
+          if (cell.variant === "triangle_green") return "삼각형:초록";
+          return SHAPE_META[cell.type].name;
+        }
+
+        /** 게임 시작 인벤 — 흰 원 씨앗만 1개 */
+        const playerInventory = {
+          circle: 1,
+          square: 0,
+          triangle: 0,
+          circle_green: 0,
+          circle_gold: 0,
+          square_gold: 0,
+          triangle_green: 0,
+        };
+
+        /** @param {number} nextSide 확장 후 한 변 칸 수 (3~5) */
+        function canAffordGridExpand(nextSide) {
+          const cost = GRID_EXPAND_COST[nextSide];
+          if (!cost) return false;
+          return GRID_EXPAND_COST_KEYS.every(function (k) {
+            return (playerInventory[k] || 0) >= (cost[k] || 0);
+          });
+        }
+
+        /** @param {number} nextSide */
+        function payGridExpandCost(nextSide) {
+          const cost = GRID_EXPAND_COST[nextSide];
+          if (!cost) return;
+          GRID_EXPAND_COST_KEYS.forEach(function (k) {
+            const n = cost[k] || 0;
+            if (n > 0) playerInventory[k] -= n;
+          });
+        }
+
+        /** 바닥에서 수집해 인벤에 들어온 누적 횟수(누적 수확 표시용) */
+        const cumulativeHarvest = {
+          circle: 0,
+          square: 0,
+          triangle: 0,
+          circle_green: 0,
+          circle_gold: 0,
+          square_gold: 0,
+          triangle_green: 0,
+        };
+
+        /**
+         * 도감 획득 경로 한 줄. requires: 해당 기본 작물을 도감에서 본 뒤에만 표시(null이면 항상 표시)
+         * @typedef {{ text: string, requires?: null | "circle" | "square" | "triangle" }} CodexPathLine
+         */
+
+        /** 도감 펼치기: 획득 경로 · 능력 · 성장/수명(표시용) */
+        const CODEX_DETAIL = {
+          circle: {
+            pathLines: [
+              {
+                text: "흰 원 수확 시 바닥에 흰 원 씨앗이 항상 떨어짐",
+                requires: "circle",
+              },
+              {
+                text: "원 수확 시 20% 확률로 획득(흰 원)",
+                requires: "circle",
+              },
+              { text: "사각형 수확 시 20% 확률로 획득", requires: "square" },
+              {
+                text: "삼각형 수확 시 20% 확률로 획득(원×2, 바닥에 연속 2회)",
+                requires: "triangle",
+              },
+            ],
+            abilityLines: ["없음"],
+            growthMs: 20_000,
+          },
+          square: {
+            pathLines: [
+              {
+                text: "흰 사각형 수확 시 바닥에 흰 사각형 씨앗",
+                requires: "square",
+              },
+              { text: "원 수확 시 15% 확률로 획득", requires: "circle" },
+              { text: "삼각형 수확 시 10% 확률로 획득", requires: "triangle" },
+            ],
+            abilityLines: ["없음"],
+            growthMs: 30_000,
+          },
+          triangle: {
+            pathLines: [
+              {
+                text: "흰 삼각형 수확 시 바닥에 흰 삼각형 씨앗",
+                requires: "triangle",
+              },
+              { text: "사각형 수확 시 10% 확률로 획득", requires: "square" },
+            ],
+            abilityLines: ["없음"],
+            growthMs: 40_000,
+          },
+          circle_green: {
+            pathLines: [
+              { text: "원 수확 시 10% 확률로 획득", requires: "circle" },
+              { text: "바닥에 떨어진 씨앗을 줍기", requires: null },
+            ],
+            abilityLines: [
+              "다 자라면 상·하·좌·우 4칸 작물의 성장에 필요한 시간이 5% 감소합니다.",
+              "수확은 할 수 없으며, 수명이 지나면 변이가 사라지고 흰 원 씨앗이 바닥에 1개 떨어집니다.",
+            ],
+            growthMs: 20_000,
+            lifespanMs: 90_000,
+          },
+          circle_gold: {
+            pathLines: [
+              { text: "원 수확 시 1% 확률로 획득", requires: "circle" },
+              { text: "바닥에 떨어진 씨앗을 줍기", requires: null },
+            ],
+            abilityLines: [
+              "수확은 할 수 없습니다.",
+              "수명이 지나면 변이가 사라지며 흰 원 씨앗을 3~5개 얻습니다.",
+            ],
+            growthMs: 20_000,
+            lifespanMs: 90_000,
+          },
+          square_gold: {
+            pathLines: [
+              { text: "사각형 수확 시 1% 확률로 획득", requires: "square" },
+              { text: "바닥에 떨어진 씨앗을 줍기", requires: null },
+            ],
+            abilityLines: [
+              "수확은 할 수 없습니다.",
+              "수명이 지나면 변이가 사라지며 흰 사각형 씨앗을 3~5개 얻습니다.",
+            ],
+            growthMs: 30_000,
+            lifespanMs: 90_000,
+          },
+          triangle_green: {
+            pathLines: [
+              { text: "삼각형 수확 시 5% 확률로 획득", requires: "triangle" },
+              { text: "바닥에 떨어진 씨앗을 줍기", requires: null },
+            ],
+            abilityLines: [
+              "다 자라면 상·하·좌·우 4칸 작물의 성장에 필요한 시간이 15% 감소합니다.",
+              "수확은 할 수 없으며, 수명이 지나면 변이가 사라지고 흰 삼각형 씨앗이 바닥에 1개 떨어집니다.",
+            ],
+            growthMs: 40_000,
+            lifespanMs: 90_000,
+          },
+        };
+
+        /** 도감 카드 표시 순: 기본 도형 → 초록 변이 → 황금 변이 */
+        const CODEX_UI_ORDER = [
+          { kind: "circle", mode: "base" },
+          { kind: "square", mode: "base" },
+          { kind: "triangle", mode: "base" },
+          {
+            kind: "circle_green",
+            mode: "bonus",
+            title: "원:초록",
+            icon: "h-8 w-8 shrink-0 rounded-full bg-emerald-400 ring-1 ring-emerald-300/70",
+          },
+          {
+            kind: "triangle_green",
+            mode: "bonus",
+            title: "삼각형:초록",
+            icon:
+              "h-8 w-8 shrink-0 bg-emerald-400 shape-tri-eq-codex ring-1 ring-emerald-300/70",
+          },
+          {
+            kind: "circle_gold",
+            mode: "bonus",
+            title: "원:황금",
+            icon: "h-8 w-8 shrink-0 rounded-full bg-amber-400 ring-1 ring-amber-200/85",
+          },
+          {
+            kind: "square_gold",
+            mode: "bonus",
+            title: "사각형:황금",
+            icon: "h-8 w-8 shrink-0 rounded-sm bg-amber-400 ring-1 ring-amber-200/85",
+          },
+        ];
+
+        /**
+         * 원 수확 시 확률 보너스 1종만
+         * 흰 원 20%, 사각형 15%, 원:초록 10%, 원:황금 1% — 나머지 54% 보너스 없음 (높은 확률 순)
+         * @returns {null | "square" | "circle" | "circle_green" | "circle_gold"}
+         */
+        function rollCircleHarvestBonus() {
+          const r = Math.random() * 100;
+          if (r < 1) return "circle_gold";
+          if (r < 11) return "circle_green";
+          if (r < 26) return "square";
+          if (r < 46) return "circle";
+          return null;
+        }
+
+        /**
+         * 사각형 수확 시 보너스 1종만
+         * 원 20%, 삼각형 10%, 사각형:황금 1% — 나머지 69% 없음
+         * @returns {null | "circle" | "triangle" | "square_gold"}
+         */
+        function rollSquareHarvestBonus() {
+          const r = Math.random() * 100;
+          if (r < 1) return "square_gold";
+          if (r < 21) return "circle";
+          if (r < 31) return "triangle";
+          return null;
+        }
+
+        /**
+         * 삼각형 수확 시 보너스 1종만
+         * 원×2 20%, 사각형 10%, 삼각형:초록 5% — 나머지 65% 없음
+         * @returns {null | "two_circles" | "square" | "triangle_green"}
+         */
+        function rollTriangleHarvestBonus() {
+          const r = Math.random() * 100;
+          if (r < 5) return "triangle_green";
+          if (r < 15) return "square";
+          if (r < 35) return "two_circles";
+          return null;
+        }
+
+        /** @type {{ row: number, col: number } | null} */
+        let plantSelectTarget = null;
+
+        /** 도감·인벤 행: 한 번이라도 인벤에 들어온 적 있으면 true (미발견은 UI에 표시 안 함) */
+        const codexDiscovered = {
+          circle: false,
+          square: false,
+          triangle: false,
+          circle_green: false,
+          circle_gold: false,
+          square_gold: false,
+          triangle_green: false,
+        };
+
+        const SHAPE_SCATTER_ITEM = {
+          circle: "rounded-full bg-white w-3 h-3 shrink-0 pointer-events-none",
+          square: "bg-white rounded-sm w-2.5 h-2.5 shrink-0 pointer-events-none",
+          triangle: "bg-white shape-tri-eq-sm shrink-0 pointer-events-none",
+        };
+
+        /** 바닥 보너스 아이템(원:초록 / 원:금) 시각 — Tailwind */
+        const BONUS_SCATTER_INNER = {
+          circle_green:
+            "rounded-full w-3 h-3 shrink-0 bg-emerald-400 ring-1 ring-emerald-300/80 shadow-[0_0_8px_rgba(52,211,153,0.55)] pointer-events-none",
+          circle_gold:
+            "rounded-full w-3 h-3 shrink-0 bg-amber-400 ring-1 ring-amber-200/90 shadow-[0_0_10px_rgba(251,191,36,0.72)] pointer-events-none",
+          square_gold:
+            "bg-amber-400 rounded-sm w-2.5 h-2.5 shrink-0 ring-1 ring-amber-200/90 shadow-[0_0_10px_rgba(251,191,36,0.72)] pointer-events-none",
+          triangle_green:
+            "bg-emerald-400 shape-tri-eq-sm shrink-0 ring-1 ring-emerald-300/80 shadow-[0_0_8px_rgba(52,211,153,0.55)] pointer-events-none",
+        };
+
+        function scatterInnerClass(shapeType, invGrant) {
+          if (invGrant === "circle_green") return BONUS_SCATTER_INNER.circle_green;
+          if (invGrant === "circle_gold") return BONUS_SCATTER_INNER.circle_gold;
+          if (invGrant === "square_gold") return BONUS_SCATTER_INNER.square_gold;
+          if (invGrant === "triangle_green")
+            return BONUS_SCATTER_INNER.triangle_green;
+          return SHAPE_SCATTER_ITEM[shapeType] + " pointer-events-none";
+        }
+
+        /** @type {HTMLElement[][]} */
+        let cellElements = [];
+
+        const GridState = {
+          cells: createGridData(),
+          getCell(row, col) {
+            return this.cells[row][col];
+          },
+          updateCell(row, col, patch) {
+            Object.assign(this.cells[row][col], patch);
+            renderGrid();
+          },
+          reset() {
+            for (let r = 0; r < gridSize; r++) {
+              for (let c = 0; c < gridSize; c++) {
+                Object.assign(this.cells[r][c], createEmptyCell());
+              }
+            }
+            renderGrid();
+          },
+          render() {
+            renderGrid();
+          },
+        };
+
+        /**
+         * @param {number} r
+         * @param {number} c
+         */
+        function isActiveGreenAuraCell(cell) {
+          if (!cell || !cell.isReady || cell.matureAt == null) return false;
+          const okVariant =
+            (cell.type === "circle" && cell.variant === "circle_green") ||
+            (cell.type === "triangle" && cell.variant === "triangle_green");
+          if (!okVariant) return false;
+          return Date.now() - cell.matureAt < VARIANT_LIFESPAN_MS;
+        }
+
+        /**
+         * 인접 초록 변이(성장 완료·수명 내): 원:초록 1개당 ×0.95(5% 감소), 삼각형:초록 1개당 ×0.85(15% 감소)
+         * @param {number} r
+         * @param {number} c
+         */
+        function neighborGrowthMultiplierFor(r, c) {
+          const dirs = [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+          ];
+          let nCircleGreen = 0;
+          let nTriangleGreen = 0;
+          for (let i = 0; i < dirs.length; i++) {
+            const nr = r + dirs[i][0];
+            const nc = c + dirs[i][1];
+            if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) continue;
+            const adj = GridState.cells[nr][nc];
+            if (!isActiveGreenAuraCell(adj)) continue;
+            if (adj.type === "circle" && adj.variant === "circle_green") nCircleGreen += 1;
+            else if (adj.type === "triangle" && adj.variant === "triangle_green")
+              nTriangleGreen += 1;
+          }
+          return Math.pow(0.95, nCircleGreen) * Math.pow(0.85, nTriangleGreen);
+        }
+
+        /**
+         * 이 칸이 활성 초록 변이(원:초록·삼각형:초록, 성장 완료·수명 내)의 상·하·좌·우 인접인지 — 태두리 표시용
+         * @param {number} r
+         * @param {number} c
+         */
+        function cellIsAdjacentToActiveGreenAura(r, c) {
+          const dirs = [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+          ];
+          for (let i = 0; i < dirs.length; i++) {
+            const nr = r + dirs[i][0];
+            const nc = c + dirs[i][1];
+            if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) continue;
+            if (isActiveGreenAuraCell(GridState.cells[nr][nc])) return true;
+          }
+          return false;
+        }
+
+        /**
+         * @param {GridCell} cell
+         * @param {number} r
+         * @param {number} c
+         */
+        function cellEffectiveGrowthRequiredMs(cell, r, c) {
+          if (cell.type === null || cell.plantedAt == null)
+            return growthTimeMsForCellType("circle");
+          const base = growthTimeMsForCellType(cell.type);
+          const mult = neighborGrowthMultiplierFor(r, c);
+          return Math.round(base * mult);
+        }
+
+        /** @param {GridCell} cell */
+        function shapeMarkupForCell(cell) {
+          const type = cell.type;
+          if (!type) return "";
+          const v = cell.variant;
+          if (type === "circle" && v === "circle_green") {
+            return (
+              '<span class="block h-8 w-8 shrink-0 rounded-full bg-emerald-400 ring-1 ring-emerald-300/70 shadow-[0_0_12px_rgba(52,211,153,0.45)]" aria-hidden="true"></span>'
+            );
+          }
+          if (type === "circle" && v === "circle_gold") {
+            return (
+              '<span class="block h-8 w-8 shrink-0 rounded-full bg-amber-400 ring-1 ring-amber-200/85 shadow-[0_0_14px_rgba(251,191,36,0.55)]" aria-hidden="true"></span>'
+            );
+          }
+          if (type === "square" && v === "square_gold") {
+            return (
+              '<span class="block h-7 w-7 shrink-0 rounded-sm bg-amber-400 ring-1 ring-amber-200/85 shadow-[0_0_14px_rgba(251,191,36,0.55)]" aria-hidden="true"></span>'
+            );
+          }
+          if (type === "triangle" && v === "triangle_green") {
+            return (
+              '<span class="block shrink-0 bg-emerald-400 ring-1 ring-emerald-300/70 shadow-[0_0_12px_rgba(52,211,153,0.45)] shape-tri-eq" aria-hidden="true"></span>'
+            );
+          }
+          const m = SHAPE_META[type];
+          if (type === "circle") {
+            return (
+              '<span class="block rounded-full ' +
+              m.fillClass +
+              ' w-8 h-8 shrink-0" aria-hidden="true"></span>'
+            );
+          }
+          if (type === "square") {
+            return (
+              '<span class="block ' +
+              m.fillClass +
+              ' w-7 h-7 rounded-sm shrink-0" aria-hidden="true"></span>'
+            );
+          }
+          if (type === "triangle") {
+            return (
+              '<span class="block shrink-0 ' +
+              m.fillClass +
+              ' shape-tri-eq" aria-hidden="true"></span>'
+            );
+          }
+          return "";
+        }
+
+        /**
+         * @param {GridCell} cell
+         * @param {number} r
+         * @param {number} c
+         */
+        function cellRemainingGrowthMs(cell, r, c) {
+          if (cell.type === null || cell.isReady) return 0;
+          if (cell.plantedAt == null) {
+            return Math.max(0, cellEffectiveGrowthRequiredMs(cell, r, c));
+          }
+          const req = cellEffectiveGrowthRequiredMs(cell, r, c);
+          return Math.max(0, cell.plantedAt + req - Date.now());
+        }
+
+        function formatDurationMs(ms) {
+          if (ms <= 0) return "0초";
+          const s = Math.ceil(ms / 1000);
+          if (s < 60) return s + "초";
+          const m = Math.floor(s / 60);
+          const r = s % 60;
+          return m + "분 " + r + "초";
+        }
+
+        const tooltipEl = document.getElementById("global-tooltip");
+        let tooltipTarget = null;
+        /** @type {number | null} */
+        let cellTooltipTick = null;
+        /** @type {{ x: number, y: number }} */
+        let cellTooltipPointer = { x: 0, y: 0 };
+        /** @type {{ r: number, c: number } | null} */
+        let cellTooltipHover = null;
+
+        function hideTooltip() {
+          if (!tooltipEl) return;
+          if (cellTooltipTick !== null) {
+            clearInterval(cellTooltipTick);
+            cellTooltipTick = null;
+          }
+          cellTooltipHover = null;
+          tooltipEl.classList.add("opacity-0");
+          tooltipEl.classList.remove("opacity-100");
+          tooltipTarget = null;
+        }
+
+        function showTooltip(clientX, clientY, html) {
+          if (!tooltipEl) return;
+          tooltipEl.innerHTML = html;
+          tooltipEl.classList.remove("opacity-0");
+          tooltipEl.classList.add("opacity-100");
+          const pad = 14;
+          let x = clientX + pad;
+          let y = clientY + pad;
+          const rect = tooltipEl.getBoundingClientRect();
+          if (x + rect.width > window.innerWidth - 8)
+            x = clientX - rect.width - pad;
+          if (y + rect.height > window.innerHeight - 8)
+            y = clientY - rect.height - pad;
+          tooltipEl.style.left = x + "px";
+          tooltipEl.style.top = y + "px";
+        }
+
+        function isBonusSeedDiscovered(seedKey) {
+          if (seedKey === "circle") return codexDiscovered.circle;
+          if (seedKey === "triangle") return codexDiscovered.triangle;
+          if (seedKey === "square") return codexDiscovered.square;
+          if (seedKey === "circle_green") return codexDiscovered.circle_green;
+          if (seedKey === "circle_gold") return codexDiscovered.circle_gold;
+          if (seedKey === "square_gold") return codexDiscovered.square_gold;
+          if (seedKey === "triangle_green") return codexDiscovered.triangle_green;
+          return true;
+        }
+
+        function mysterySeedSlotHtml() {
+          return (
+            '<span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-white/15 bg-white/5 text-[12px] font-bold leading-none text-white/35">?</span>'
+          );
+        }
+
+        function miniBonusSeedIconHtml(seedKey) {
+          if (seedKey === "triangle") {
+            return (
+              '<span class="inline-block shrink-0 bg-white shape-tri-eq-sm" aria-hidden="true"></span>'
+            );
+          }
+          if (seedKey === "square") {
+            return (
+              '<span class="inline-block h-3 w-3 shrink-0 rounded-sm bg-white ring-1 ring-white/25" aria-hidden="true"></span>'
+            );
+          }
+          if (seedKey === "circle") {
+            return (
+              '<span class="inline-block h-3 w-3 shrink-0 rounded-full bg-white ring-1 ring-white/30" aria-hidden="true"></span>'
+            );
+          }
+          if (seedKey === "circle_green") {
+            return (
+              '<span class="inline-block h-3 w-3 shrink-0 rounded-full bg-emerald-400 ring-1 ring-emerald-300/70" aria-hidden="true"></span>'
+            );
+          }
+          if (seedKey === "circle_gold") {
+            return (
+              '<span class="inline-block h-3 w-3 shrink-0 rounded-full bg-amber-400 ring-1 ring-amber-200/85" aria-hidden="true"></span>'
+            );
+          }
+          if (seedKey === "square_gold") {
+            return (
+              '<span class="inline-block h-3 w-3 shrink-0 rounded-sm bg-amber-400 ring-1 ring-amber-200/85" aria-hidden="true"></span>'
+            );
+          }
+          if (seedKey === "triangle_green") {
+            return (
+              '<span class="inline-block shrink-0 bg-emerald-400 shape-tri-eq-sm ring-1 ring-emerald-300/70" aria-hidden="true"></span>'
+            );
+          }
+          return mysterySeedSlotHtml();
+        }
+
+        /** @param {number} nextSide 확장 후 한 변 칸 수 (3~5) */
+        function gridExpandCostHtml(nextSide) {
+          const cost = GRID_EXPAND_COST[nextSide];
+          if (!cost) return "";
+          const parts = [];
+          GRID_EXPAND_COST_KEYS.forEach(function (k) {
+            const n = cost[k] || 0;
+            if (n <= 0) return;
+            const disc = isBonusSeedDiscovered(k);
+            const iconHtml = disc
+              ? miniBonusSeedIconHtml(k)
+              : mysterySeedSlotHtml();
+            parts.push(
+              '<span class="inline-flex cursor-default items-center gap-0.5 rounded-md bg-black/35 px-1.5 py-0.5 ring-1 ring-white/10" data-grid-cost-key="' +
+                k +
+                '">' +
+                iconHtml +
+                '<span class="tabular-nums text-[11px] font-medium text-white/90">×' +
+                n +
+                "</span></span>"
+            );
+          });
+          return (
+            '<div class="flex flex-wrap items-center justify-center gap-1.5">' +
+            parts.join("") +
+            "</div>"
+          );
+        }
+
+        /** 심어진 도형 기준으로 수확 시 추가 씨앗 확률 행 */
+        function bonusSeedTableRowsForPlanted(plantedType) {
+          if (plantedType === "circle") {
+            return [
+              { key: "circle", label: "원", pct: 20 },
+              { key: "square", label: "사각형", pct: 15 },
+              { key: "circle_green", label: "원:초록", pct: 10 },
+              { key: "circle_gold", label: "원:황금", pct: 1 },
+            ];
+          }
+          if (plantedType === "square") {
+            return [
+              { key: "circle", label: "원", pct: 20 },
+              { key: "triangle", label: "삼각형", pct: 10 },
+              { key: "square_gold", label: "사각형:황금", pct: 1 },
+            ];
+          }
+          if (plantedType === "triangle") {
+            return [
+              { key: "circle", label: "원×2", pct: 20 },
+              { key: "square", label: "사각형", pct: 10 },
+              { key: "triangle_green", label: "삼각형:초록", pct: 5 },
+            ];
+          }
+          return [
+            { key: "circle", label: "원", pct: 0 },
+            { key: "square", label: "사각형", pct: 0 },
+            { key: "circle_green", label: "원:초록", pct: 0 },
+            { key: "circle_gold", label: "원:황금", pct: 0 },
+          ];
+        }
+
+        function bonusSeedTableSubtitle(plantedType) {
+          if (plantedType === "circle") {
+            return "원 수확 시 · 보너스 1종만";
+          }
+          if (plantedType === "square") {
+            return "사각형 수확 시 · 보너스 1종만";
+          }
+          if (plantedType === "triangle") {
+            return "삼각형 수확 시 · 보너스 1종만";
+          }
+          return "추가 바닥 씨앗 없음";
+        }
+
+        function buildAdditionalSeedProbabilityTableHtml(plantedType) {
+          const rows = bonusSeedTableRowsForPlanted(plantedType);
+          const sub = bonusSeedTableSubtitle(plantedType);
+          const body = rows
+            .map(function (row) {
+              const disc = isBonusSeedDiscovered(row.key);
+              const icon = disc ? miniBonusSeedIconHtml(row.key) : mysterySeedSlotHtml();
+              const nameLabel = disc ? row.label : "???";
+              return (
+                '<div class="flex items-center justify-between gap-2 border-b border-white/5 py-1.5 last:border-b-0">' +
+                '<span class="flex min-w-0 flex-1 items-center gap-2">' +
+                icon +
+                '<span class="text-[11px] text-white/75">' +
+                nameLabel +
+                "</span></span>" +
+                '<span class="shrink-0 tabular-nums text-[11px] text-white/90">' +
+                row.pct +
+                "%</span>" +
+                "</div>"
+              );
+            })
+            .join("");
+          return (
+            '<div class="mt-2 rounded-lg border border-white/10 bg-black/35 p-2.5 shadow-inner ring-1 ring-white/[0.06]">' +
+            '<div class="border-b border-white/10 pb-1.5 text-[11px] font-semibold text-white/90">추가 씨앗 확률표</div>' +
+            '<p class="mb-1.5 mt-1.5 text-[10px] leading-snug text-white/40">' +
+            sub +
+            "</p>" +
+            body +
+            "</div>"
+          );
+        }
+
+        /**
+         * @param {GridCell} cell
+         * @param {number} r
+         * @param {number} c
+         */
+        function tooltipHtmlForCell(cell, r, c) {
+          if (cell.type === null) return "";
+          const id = cell.type;
+          const nameKo = plantedCellTitleKo(cell);
+          if (cell.variant) {
+            if (!cell.isReady) {
+              const growthValueHtml =
+                '<span class="tabular-nums text-white/90">' +
+                formatDurationMs(cellRemainingGrowthMs(cell, r, c)) +
+                "</span>";
+              return (
+                '<div class="space-y-0">' +
+                '<div class="text-[13px] font-semibold tracking-tight text-white">' +
+                nameKo +
+                "</div>" +
+                '<p class="mt-1.5 text-[11px] leading-snug text-white/45">변이 작물 · 수확 불가</p>' +
+                '<div class="mt-2 flex items-start justify-between gap-3 border-b border-white/10 pb-2 text-[11px] leading-snug">' +
+                '<span class="shrink-0 text-white/45">성장 완료까지 남은 시간</span>' +
+                '<span class="min-w-0 text-right">' +
+                growthValueHtml +
+                "</span></div>" +
+                "</div>"
+              );
+            }
+            const leftMs = Math.max(
+              0,
+              VARIANT_LIFESPAN_MS - (Date.now() - (cell.matureAt || 0))
+            );
+            return (
+              '<div class="space-y-0">' +
+              '<div class="text-[13px] font-semibold tracking-tight text-white">' +
+              nameKo +
+              "</div>" +
+              '<p class="mt-1.5 text-[11px] leading-snug text-amber-200/85">변이 작물 · 수확 불가 · 수명 종료 시 기본 씨앗 드롭</p>' +
+              '<div class="mt-2 flex items-start justify-between gap-3 border-b border-white/10 pb-2 text-[11px] leading-snug">' +
+              '<span class="shrink-0 text-white/45">남은 수명</span>' +
+              '<span class="min-w-0 text-right tabular-nums text-white/90">' +
+              formatDurationMs(leftMs) +
+              "</span></div>" +
+              "</div>"
+            );
+          }
+          const growthDone = cell.isReady;
+          const growthValueHtml = growthDone
+            ? '<span class="font-medium text-emerald-400">성장 완료</span>'
+            : '<span class="tabular-nums text-white/90">' +
+              formatDurationMs(cellRemainingGrowthMs(cell, r, c)) +
+              "</span>";
+          return (
+            '<div class="space-y-0">' +
+            '<div class="text-[13px] font-semibold tracking-tight text-white">' +
+            nameKo +
+            "</div>" +
+            '<div class="mt-2 flex items-start justify-between gap-3 border-b border-white/10 pb-2 text-[11px] leading-snug">' +
+            '<span class="shrink-0 text-white/45">성장 완료까지 남은 시간</span>' +
+            '<span class="min-w-0 text-right">' +
+            growthValueHtml +
+            "</span></div>" +
+            buildAdditionalSeedProbabilityTableHtml(id) +
+            "</div>"
+          );
+        }
+
+        function tooltipHtmlForScatter(grant) {
+          var title =
+            grant === "circle_green"
+              ? "원:초록"
+              : grant === "circle_gold"
+                ? "원:황금"
+                : grant === "square_gold"
+                  ? "사각형:황금"
+                  : grant === "triangle_green"
+                    ? "삼각형:초록"
+                    : grant;
+          var titleClass =
+            grant === "circle_green" ||
+            grant === "circle_gold" ||
+            grant === "square_gold" ||
+            grant === "triangle_green"
+              ? "text-[13px] font-semibold tracking-tight text-white"
+              : "font-mono text-[13px] font-semibold tracking-tight text-white";
+          return (
+            '<div class="space-y-1.5">' +
+            '<div class="' +
+            titleClass +
+            '">' +
+            title +
+            "</div>" +
+            '<p class="text-[11px] leading-snug text-amber-200/90">바닥 아이템 · 도형 위에 올리면 수집</p>' +
+            "</div>"
+          );
+        }
+
+        function cumulativeHarvestForKind(kind) {
+          if (kind === "circle_green") return cumulativeHarvest.circle_green;
+          if (kind === "circle_gold") return cumulativeHarvest.circle_gold;
+          if (kind === "square_gold") return cumulativeHarvest.square_gold;
+          if (kind === "triangle_green") return cumulativeHarvest.triangle_green;
+          return cumulativeHarvest[kind] ?? 0;
+        }
+
+        function codexChevronSvg() {
+          return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-white/40 transition-transform duration-200" data-codex-chevron aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+          );
+        }
+
+        /** @param {CodexPathLine} line */
+        function codexPathLineVisible(line) {
+          const req = line.requires;
+          if (req == null || req === undefined) return true;
+          return !!codexDiscovered[req];
+        }
+
+        function codexPathBlockHtml(kind) {
+          const d = CODEX_DETAIL[kind];
+          if (!d || !d.pathLines) return "";
+          const visible = d.pathLines.filter(codexPathLineVisible);
+          if (visible.length === 0) {
+            return (
+              '<p class="text-white/45">아직 도감에 등록되지 않은 작물을 통한 획득 경로는 표시되지 않습니다.</p>'
+            );
+          }
+          return visible
+            .map(function (line) {
+              return '<div class="leading-snug">- ' + line.text + "</div>";
+            })
+            .join("");
+        }
+
+        function codexAbilityBlockHtml(kind) {
+          const d = CODEX_DETAIL[kind];
+          if (!d) return "";
+          const lines = d.abilityLines || [];
+          return lines
+            .map(function (line) {
+              return '<div class="leading-snug">- ' + line + "</div>";
+            })
+            .join("");
+        }
+
+        function codexDetailSectionHtml(kind) {
+          const d = CODEX_DETAIL[kind];
+          if (!d) return "";
+          const n = cumulativeHarvestForKind(kind);
+          const introBase =
+            kind === "circle" || kind === "square" || kind === "triangle"
+              ? '<p class="mb-2 text-[11px] text-white/50">가장 기본적인 도형</p>'
+              : "";
+          const growthRow =
+            typeof d.growthMs === "number"
+              ? '<div><span class="mb-0.5 block text-white/45">성장 시간</span><span class="tabular-nums text-white/75">' +
+                formatDurationMs(d.growthMs) +
+                "</span></div>"
+              : "";
+          const lifespanRow =
+            typeof d.lifespanMs === "number"
+              ? '<div><span class="mb-0.5 block text-white/45">수명</span><span class="tabular-nums text-white/75">' +
+                formatDurationMs(d.lifespanMs) +
+                "</span></div>"
+              : "";
+          const hasAbility =
+            Array.isArray(d.abilityLines) && d.abilityLines.length > 0;
+          const abilityBlock = hasAbility
+            ? '<div><span class="mb-0.5 block text-white/45">능력</span>' +
+              '<div class="mt-1 space-y-1 text-white/75">' +
+              codexAbilityBlockHtml(kind) +
+              "</div></div>"
+            : "";
+          return (
+            '<div data-codex-detail class="hidden mt-3 space-y-3 border-t border-white/10 pt-3 text-[11px] leading-relaxed">' +
+            introBase +
+            '<div><span class="text-white/45">누적 수확</span> <span class="tabular-nums font-medium text-white">' +
+            n +
+            "</span>개</div>" +
+            growthRow +
+            lifespanRow +
+            '<div><span class="mb-0.5 block text-white/45">획득 경로</span>' +
+            '<div class="mt-1 space-y-1 text-white/75">' +
+            codexPathBlockHtml(kind) +
+            "</div></div>" +
+            abilityBlock +
+            "</div>"
+          );
+        }
+
+        function initCodexExpand() {
+          const root = document.getElementById("codex-ui");
+          if (!root || root.dataset.codexExpandInit === "1") return;
+          root.dataset.codexExpandInit = "1";
+          root.addEventListener("click", function (e) {
+            const btn = e.target.closest("[data-codex-toggle]");
+            if (!btn) return;
+            const card = btn.closest(".codex-card");
+            if (!card) return;
+            const detail = card.querySelector("[data-codex-detail]");
+            const chev = btn.querySelector("[data-codex-chevron]");
+            const expanded = btn.getAttribute("aria-expanded") === "true";
+            const next = !expanded;
+            btn.setAttribute("aria-expanded", String(next));
+            if (detail) detail.classList.toggle("hidden", !next);
+            if (chev) chev.classList.toggle("rotate-180", next);
+          });
+        }
+
+        function bindCellTooltip(cellEl, r, c) {
+          function refreshCellTooltip() {
+            if (!cellTooltipHover) return;
+            const cell = GridState.getCell(cellTooltipHover.r, cellTooltipHover.c);
+            if (cell.type === null) {
+              hideTooltip();
+              return;
+            }
+            showTooltip(
+              cellTooltipPointer.x,
+              cellTooltipPointer.y,
+              tooltipHtmlForCell(cell, cellTooltipHover.r, cellTooltipHover.c)
+            );
+          }
+
+          cellEl.addEventListener("mouseenter", function (e) {
+            const cell = GridState.getCell(r, c);
+            if (cell.type === null) {
+              hideTooltip();
+              return;
+            }
+            cellTooltipPointer.x = e.clientX;
+            cellTooltipPointer.y = e.clientY;
+            cellTooltipHover = { r: r, c: c };
+            tooltipTarget = "cell";
+            if (cellTooltipTick !== null) clearInterval(cellTooltipTick);
+            cellTooltipTick = setInterval(refreshCellTooltip, 100);
+            showTooltip(e.clientX, e.clientY, tooltipHtmlForCell(cell, r, c));
+          });
+          cellEl.addEventListener("mousemove", function (e) {
+            const cell = GridState.getCell(r, c);
+            if (cell.type === null) {
+              hideTooltip();
+              return;
+            }
+            cellTooltipPointer.x = e.clientX;
+            cellTooltipPointer.y = e.clientY;
+            showTooltip(e.clientX, e.clientY, tooltipHtmlForCell(cell, r, c));
+          });
+          cellEl.addEventListener("mouseleave", hideTooltip);
+        }
+
+        /**
+         * @param {string} seedKey
+         */
+        function gridExpandCostTooltipHtml(seedKey) {
+          const label = isBonusSeedDiscovered(seedKey)
+            ? seedLabelKo(seedKey)
+            : "미발견";
+          return (
+            '<div class="text-[13px] font-semibold tracking-tight text-white">' +
+            label +
+            "</div>"
+          );
+        }
+
+        function initGridUpgradeCostTooltips() {
+          const detail = document.getElementById("grid-upgrade-detail");
+          if (!detail || detail.dataset.costTipInit === "1") return;
+          detail.dataset.costTipInit = "1";
+
+          function showGridCostTip(e, key) {
+            showTooltip(e.clientX, e.clientY, gridExpandCostTooltipHtml(key));
+            tooltipTarget = "gridCost";
+          }
+
+          detail.addEventListener("mouseover", function (e) {
+            const chip = e.target.closest("[data-grid-cost-key]");
+            if (!chip) return;
+            const key = chip.getAttribute("data-grid-cost-key");
+            if (!key) return;
+            showGridCostTip(e, key);
+          });
+
+          detail.addEventListener("mousemove", function (e) {
+            const chip = e.target.closest("[data-grid-cost-key]");
+            if (!chip) {
+              if (tooltipTarget === "gridCost") hideTooltip();
+              return;
+            }
+            const key = chip.getAttribute("data-grid-cost-key");
+            if (!key) return;
+            showGridCostTip(e, key);
+          });
+
+          detail.addEventListener("mouseleave", function () {
+            if (tooltipTarget === "gridCost") hideTooltip();
+          });
+        }
+
+        function refreshInventoryRowVisibility() {
+          const pairs = [
+            ["circle", codexDiscovered.circle],
+            ["square", codexDiscovered.square],
+            ["triangle", codexDiscovered.triangle],
+            ["circle-green", codexDiscovered.circle_green],
+            ["triangle-green", codexDiscovered.triangle_green],
+            ["circle-gold", codexDiscovered.circle_gold],
+            ["square-gold", codexDiscovered.square_gold],
+          ];
+          pairs.forEach(function (pair) {
+            const el = document.getElementById("inv-row-" + pair[0]);
+            if (el) el.classList.toggle("hidden", !pair[1]);
+          });
+        }
+
+        function renderInventory() {
+          const c = document.getElementById("inv-count-circle");
+          const s = document.getElementById("inv-count-square");
+          const t = document.getElementById("inv-count-triangle");
+          const cg = document.getElementById("inv-count-circle-green");
+          const cgo = document.getElementById("inv-count-circle-gold");
+          const sg = document.getElementById("inv-count-square-gold");
+          const tg = document.getElementById("inv-count-triangle-green");
+          if (c) c.textContent = String(playerInventory.circle);
+          if (s) s.textContent = String(playerInventory.square);
+          if (t) t.textContent = String(playerInventory.triangle);
+          if (cg) cg.textContent = String(playerInventory.circle_green);
+          if (cgo) cgo.textContent = String(playerInventory.circle_gold);
+          if (sg) sg.textContent = String(playerInventory.square_gold);
+          if (tg) tg.textContent = String(playerInventory.triangle_green);
+          SHAPE_TYPES.forEach(function (id) {
+            if (playerInventory[id] > 0) codexDiscovered[id] = true;
+          });
+          if (playerInventory.circle_green > 0) codexDiscovered.circle_green = true;
+          if (playerInventory.circle_gold > 0) codexDiscovered.circle_gold = true;
+          if (playerInventory.square_gold > 0) codexDiscovered.square_gold = true;
+          if (playerInventory.triangle_green > 0) codexDiscovered.triangle_green = true;
+          refreshInventoryRowVisibility();
+          renderCodex();
+          updateGridUpgradeUi();
+        }
+
+        function renderCodex() {
+          const root = document.getElementById("codex-ui");
+          if (!root) return;
+          root.innerHTML = "";
+
+          CODEX_UI_ORDER.forEach(function (entry) {
+            const id = entry.kind;
+            const discovered = codexDiscovered[id];
+            if (!discovered) return;
+            const card = document.createElement("div");
+            card.className =
+              "codex-card h-fit w-full rounded-xl border border-white/10 bg-black/40 p-3 shadow-md ring-1 ring-white/5";
+            if (entry.mode === "base") {
+              const m = SHAPE_META[id];
+              const iconClass =
+                id === "circle"
+                  ? "h-8 w-8 shrink-0 rounded-full " + m.fillClass
+                  : id === "square"
+                    ? "h-8 w-8 shrink-0 rounded-sm " + m.fillClass
+                    : m.fillClass + " shape-tri-eq-codex shrink-0";
+              card.innerHTML =
+                '<button type="button" data-codex-toggle class="flex w-full items-start gap-2 rounded-lg p-0 text-left outline-none transition hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-white/25" aria-expanded="false">' +
+                '<div class="flex shrink-0 items-center justify-center rounded-lg bg-black/40 p-2 ring-1 ring-white/5"><span class="block ' +
+                iconClass +
+                '"></span></div>' +
+                '<div class="min-w-0 flex-1 pt-0.5">' +
+                '<div class="font-medium text-white/90">' +
+                m.name +
+                ' <span class="text-white/45">(' +
+                m.nameEn +
+                ')</span></div>' +
+                '<div class="mt-1 text-[11px] text-white/35">클릭하여 상세 정보</div>' +
+                "</div>" +
+                codexChevronSvg() +
+                "</button>" +
+                codexDetailSectionHtml(id);
+            } else {
+              card.innerHTML =
+                '<button type="button" data-codex-toggle class="flex w-full items-start gap-2 rounded-lg p-0 text-left outline-none transition hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-white/25" aria-expanded="false">' +
+                '<div class="flex shrink-0 items-center justify-center rounded-lg bg-black/40 p-2 ring-1 ring-white/5"><span class="block ' +
+                entry.icon +
+                '"></span></div>' +
+                '<div class="min-w-0 flex-1 pt-0.5">' +
+                '<div class="font-medium text-white/90">' +
+                entry.title +
+                '</div><div class="mt-1 text-[11px] text-white/35">클릭하여 상세 정보</div>' +
+                "</div>" +
+                codexChevronSvg() +
+                "</button>" +
+                codexDetailSectionHtml(id);
+            }
+            root.appendChild(card);
+          });
+        }
+
+        function closePlantSelectUI() {
+          plantSelectTarget = null;
+          const panel = document.getElementById("plant-select-panel");
+          if (panel) {
+            panel.classList.add("hidden");
+            panel.style.left = "";
+            panel.style.top = "";
+          }
+        }
+
+        /** 클릭한 셀 오른쪽(공간 부족 시 왼쪽)에 패널 배치 */
+        function positionPlantPanel(cellEl) {
+          const panel = document.getElementById("plant-select-panel");
+          if (!panel || !cellEl) return;
+          const rect = cellEl.getBoundingClientRect();
+          const gap = 8;
+          const margin = 8;
+          const pw = panel.offsetWidth || 260;
+          const ph = panel.offsetHeight || 200;
+          let left = rect.right + gap;
+          let top = rect.top;
+          if (left + pw > window.innerWidth - margin) {
+            left = rect.left - gap - pw;
+          }
+          if (left < margin) left = margin;
+          if (top + ph > window.innerHeight - margin) {
+            top = Math.max(margin, window.innerHeight - ph - margin);
+          }
+          if (top < margin) top = margin;
+          panel.style.left = left + "px";
+          panel.style.top = top + "px";
+        }
+
+        function openPlantSelectUI(row, col, cellEl) {
+          plantSelectTarget = { row: row, col: col };
+          const panel = document.getElementById("plant-select-panel");
+          const container = document.getElementById("plant-select-buttons");
+          if (!panel || !container) return;
+          container.innerHTML = "";
+
+          const available = PLANTABLE_KEYS.filter(function (key) {
+            return (
+              (playerInventory[key] || 0) > 0 && isBonusSeedDiscovered(key)
+            );
+          });
+
+          if (available.length === 0) {
+            container.innerHTML =
+              '<div class="rounded-lg border border-white/10 px-2 py-1.5 text-center text-xs text-white/45">없음</div>';
+          } else {
+            available.forEach(function (seedKey) {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className =
+                "flex w-full items-center justify-between gap-2 rounded-lg border border-white/15 bg-black/50 px-2.5 py-2 text-left text-sm text-white shadow-sm ring-1 ring-white/5 transition hover:border-white/30 hover:bg-white/10";
+              btn.innerHTML =
+                '<span class="' +
+                plantSelectSeedLabelClass(seedKey) +
+                '">' +
+                seedLabelKo(seedKey) +
+                '</span><span class="font-mono text-xs tabular-nums text-white/85">' +
+                playerInventory[seedKey] +
+                "</span>";
+              btn.addEventListener("click", function () {
+                confirmPlantFromInventory(seedKey);
+              });
+              container.appendChild(btn);
+            });
+          }
+
+          panel.classList.remove("hidden");
+          requestAnimationFrame(function () {
+            positionPlantPanel(cellEl);
+          });
+        }
+
+        function confirmPlantFromInventory(seedKey) {
+          if (!plantSelectTarget) return;
+          if ((playerInventory[seedKey] || 0) < 1) return;
+          const spec = plantSpecFromSeedKey(seedKey);
+          if (!spec) return;
+          const r = plantSelectTarget.row;
+          const c = plantSelectTarget.col;
+          const data = GridState.getCell(r, c);
+          if (data.type !== null) {
+            closePlantSelectUI();
+            return;
+          }
+          playerInventory[seedKey] -= 1;
+          GridState.updateCell(r, c, {
+            type: spec.type,
+            variant: spec.variant,
+            growthTime: growthTimeMsForCellType(spec.type),
+            isReady: false,
+            plantedAt: Date.now(),
+            matureAt: null,
+          });
+          renderInventory();
+          renderCodex();
+          closePlantSelectUI();
+        }
+
+        function collectScatterItem(hitEl) {
+          const grant = hitEl.dataset.invGrant || hitEl.dataset.shapeType;
+          const okGrant =
+            grant &&
+            (SHAPE_TYPES.includes(grant) ||
+              grant === "circle_green" ||
+              grant === "circle_gold" ||
+              grant === "square_gold" ||
+              grant === "triangle_green");
+          if (!okGrant) return;
+          if (hitEl.dataset.collected === "1") return;
+          if (hitEl.dataset.scatterAnimating === "1") return;
+          hitEl.dataset.collected = "1";
+          if (grant === "circle_green") {
+            playerInventory.circle_green += 1;
+            cumulativeHarvest.circle_green += 1;
+          } else if (grant === "circle_gold") {
+            playerInventory.circle_gold += 1;
+            cumulativeHarvest.circle_gold += 1;
+          } else if (grant === "square_gold") {
+            playerInventory.square_gold += 1;
+            cumulativeHarvest.square_gold += 1;
+          } else if (grant === "triangle_green") {
+            playerInventory.triangle_green += 1;
+            cumulativeHarvest.triangle_green += 1;
+          } else {
+            playerInventory[grant] += 1;
+            cumulativeHarvest[grant] += 1;
+          }
+          const wrap = hitEl.closest(".scatter-item-wrap");
+          if (wrap) wrap.remove();
+          else hitEl.remove();
+          hideTooltip();
+          renderInventory();
+          console.log("[수집]", {
+            grant: grant,
+            인벤토리: { ...playerInventory },
+          });
+        }
+
+        /** 수확 셀 중심 기준 ±0.6 그리드 이내 랜덤 (최종 착지, 중력 없음) */
+        function randomGridOffsetFromHarvest() {
+          return Math.random() * 1.2 - 0.6;
+        }
+
+        /** 2차 베지어 포물선 상의 점 (P1은 중점 위로 당겨 포물선 느낌) */
+        function quadBezierPoint(P0, P1, P2, t) {
+          const u = 1 - t;
+          return {
+            x: u * u * P0.x + 2 * u * t * P1.x + t * t * P2.x,
+            y: u * u * P0.y + 2 * u * t * P1.y + t * t * P2.y,
+          };
+        }
+
+        function scatterGrantAriaLabel(invGrant) {
+          if (invGrant === "circle_green") return "원:초록 — 도형 위에 올리면 수집";
+          if (invGrant === "circle_gold") return "원:황금 — 도형 위에 올리면 수집";
+          if (invGrant === "square_gold") return "사각형:황금 — 도형 위에 올리면 수집";
+          if (invGrant === "triangle_green") return "삼각형:초록 — 도형 위에 올리면 수집";
+          return SHAPE_META[invGrant].name + " — 도형 위에 올리면 수집";
+        }
+
+        /**
+         * @param {string} shapeType 그리드/애니메이션용 도형
+         * @param {number} fromRow
+         * @param {number} fromCol
+         * @param {string} [invGrantOpt] 인벤 반영 키 (미지정 시 shapeType)
+         */
+        function spawnScatteredHarvestItem(shapeType, fromRow, fromCol, invGrantOpt) {
+          const invGrant = invGrantOpt || shapeType;
+          const layer = document.getElementById("grid-scatter-layer");
+          if (!layer) return;
+          const ox = randomGridOffsetFromHarvest();
+          const oy = randomGridOffsetFromHarvest();
+          let gx = fromCol + 0.5 + ox;
+          let gy = fromRow + 0.5 + oy;
+          gx = Math.max(0, Math.min(gridSize, gx));
+          gy = Math.max(0, Math.min(gridSize, gy));
+
+          const wrap = document.createElement("div");
+          wrap.className =
+            "scatter-item-wrap absolute z-[6] flex items-center justify-center pointer-events-none";
+          wrap.style.left = (gx / gridSize) * 100 + "%";
+          wrap.style.top = (gy / gridSize) * 100 + "%";
+          wrap.style.transform = "translate(-50%, -50%)";
+
+          const hitZone = document.createElement("div");
+          hitZone.className =
+            "scatter-hit flex items-center justify-center p-0 pointer-events-none";
+          hitZone.dataset.shapeType = shapeType;
+          hitZone.dataset.invGrant = invGrant;
+          hitZone.dataset.scatterAnimating = "1";
+          hitZone.setAttribute("role", "presentation");
+
+          const inner = document.createElement("div");
+          inner.className = scatterInnerClass(shapeType, invGrant);
+          inner.setAttribute("aria-hidden", "true");
+          hitZone.appendChild(inner);
+          wrap.appendChild(hitZone);
+          layer.appendChild(wrap);
+
+          const lw = layer.offsetWidth || gridSize * CELL_PX;
+          const lh = layer.offsetHeight || gridSize * CELL_PX;
+          const pixelFX = (gx / gridSize) * lw;
+          const pixelFY = (gy / gridSize) * lh;
+          const pixelSX = ((fromCol + 0.5) / gridSize) * lw;
+          const pixelSY = ((fromRow + 0.5) / gridSize) * lh;
+          const offX = pixelSX - pixelFX;
+          const offY = pixelSY - pixelFY;
+
+          const P0 = { x: offX, y: offY };
+          const P2 = { x: 0, y: 0 };
+          const mid = { x: (P0.x + P2.x) / 2, y: (P0.y + P2.y) / 2 };
+          const lift = -Math.min(
+            52,
+            16 + Math.hypot(offX, offY) * 0.14
+          );
+          const P1 = { x: mid.x, y: mid.y + lift };
+
+          const steps = 14;
+          const frames = [];
+          for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            const p = quadBezierPoint(P0, P1, P2, t);
+            frames.push({
+              transform: "translate(" + p.x + "px, " + p.y + "px)",
+            });
+          }
+
+          const anim = inner.animate(frames, {
+            duration: 450,
+            easing: "linear",
+            fill: "forwards",
+          });
+
+          anim.finished.then(function () {
+            hitZone.dataset.scatterAnimating = "0";
+            inner.style.pointerEvents = "auto";
+            inner.style.cursor = "default";
+            hitZone.setAttribute("aria-label", scatterGrantAriaLabel(invGrant));
+
+            inner.addEventListener("mousemove", function (e) {
+              if (hitZone.dataset.collected === "1") return;
+              showTooltip(
+                e.clientX,
+                e.clientY,
+                tooltipHtmlForScatter(invGrant)
+              );
+            });
+            inner.addEventListener("mouseleave", hideTooltip);
+            inner.addEventListener("mouseenter", function onCollect() {
+              if (
+                hitZone.dataset.collected === "1" ||
+                hitZone.dataset.scatterAnimating === "1"
+              )
+                return;
+              collectScatterItem(hitZone);
+            });
+          }).catch(function () {});
+        }
+
+        function renderGrid() {
+          for (let r = 0; r < gridSize; r++) {
+            for (let c = 0; c < gridSize; c++) {
+              const el = cellElements[r][c];
+              if (!el) continue;
+              const cell = GridState.cells[r][c];
+              const { type, isReady } = cell;
+              el.innerHTML = shapeMarkupForCell(cell);
+              const showReadyHighlight =
+                type !== null && isReady && !cell.variant;
+              const greenNeighbor = cellIsAdjacentToActiveGreenAura(r, c);
+              let extra = "";
+              if (greenNeighbor) extra += " " + CELL_GREEN_AURA_NEIGHBOR_BORDER;
+              if (showReadyHighlight) extra += " " + CELL_READY_CLASS;
+              el.className = cellClass + extra;
+              el.dataset.ready = showReadyHighlight ? "true" : "false";
+              el.dataset.greenNeighborAura = greenNeighbor ? "true" : "false";
+            }
+          }
+        }
+
+        function tickGrowth() {
+          const now = Date.now();
+          let changed = false;
+          for (let r = 0; r < gridSize; r++) {
+            for (let c = 0; c < gridSize; c++) {
+              const cell = GridState.cells[r][c];
+              if (cell.type === null) continue;
+
+              if (cell.variant && cell.isReady && cell.matureAt != null) {
+                if (now - cell.matureAt >= VARIANT_LIFESPAN_MS) {
+                  if (cell.variant === "circle_gold") {
+                    const n = randomInt3To5();
+                    for (let i = 0; i < n; i++)
+                      spawnScatteredHarvestItem("circle", r, c);
+                  } else if (cell.variant === "square_gold") {
+                    const n = randomInt3To5();
+                    for (let i = 0; i < n; i++)
+                      spawnScatteredHarvestItem("square", r, c);
+                  } else {
+                    spawnScatteredHarvestItem(cell.type, r, c);
+                  }
+                  Object.assign(cell, createEmptyCell());
+                  changed = true;
+                }
+                continue;
+              }
+
+              if (cell.isReady) continue;
+              if (cell.plantedAt == null) continue;
+              const req = cellEffectiveGrowthRequiredMs(cell, r, c);
+              if (now - cell.plantedAt >= req) {
+                cell.isReady = true;
+                if (cell.variant) cell.matureAt = now;
+                changed = true;
+              }
+            }
+          }
+          if (changed) renderGrid();
+        }
+
+        const grid = document.getElementById("game-grid");
+        const sample = document.getElementById("cell-class-sample");
+        if (!grid || !sample) return;
+
+        const cellClass = sample.className;
+
+        let inventoryCollapsed = false;
+        let codexCollapsed = false;
+
+        const ICON_CHEVRON_LEFT =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none h-5 w-5" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+        const ICON_CHEVRON_RIGHT =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none h-5 w-5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+
+        function applySidebarPanels() {
+          const invAside = document.getElementById("inventory-aside");
+          const invContent = document.getElementById("inventory-content");
+          const invBtn = document.getElementById("inventory-toggle");
+          const codexAside = document.getElementById("codex-aside");
+          const codexContent = document.getElementById("codex-content");
+          const codexBtn = document.getElementById("codex-toggle");
+          if (!invAside || !invContent || !invBtn || !codexAside || !codexContent || !codexBtn)
+            return;
+
+          invBtn.innerHTML = inventoryCollapsed ? ICON_CHEVRON_RIGHT : ICON_CHEVRON_LEFT;
+          invBtn.setAttribute("aria-expanded", String(!inventoryCollapsed));
+          invBtn.setAttribute(
+            "aria-label",
+            inventoryCollapsed ? "인벤토리 펼치기" : "인벤토리 접기"
+          );
+          invContent.classList.toggle("lg:hidden", inventoryCollapsed);
+          invAside.classList.toggle("lg:w-72", !inventoryCollapsed);
+          invAside.classList.toggle("lg:w-14", inventoryCollapsed);
+          invAside.classList.toggle("lg:p-4", !inventoryCollapsed);
+          invAside.classList.toggle("lg:p-2", inventoryCollapsed);
+
+          codexBtn.innerHTML = codexCollapsed ? ICON_CHEVRON_LEFT : ICON_CHEVRON_RIGHT;
+          codexBtn.setAttribute("aria-expanded", String(!codexCollapsed));
+          codexBtn.setAttribute(
+            "aria-label",
+            codexCollapsed ? "도감 펼치기" : "도감 접기"
+          );
+          codexContent.classList.toggle("lg:hidden", codexCollapsed);
+          codexAside.classList.toggle("lg:w-80", !codexCollapsed);
+          codexAside.classList.toggle("lg:w-14", codexCollapsed);
+          codexAside.classList.toggle("lg:p-4", !codexCollapsed);
+          codexAside.classList.toggle("lg:p-2", codexCollapsed);
+        }
+
+        document.getElementById("inventory-toggle")?.addEventListener("click", function () {
+          inventoryCollapsed = !inventoryCollapsed;
+          applySidebarPanels();
+        });
+        document.getElementById("codex-toggle")?.addEventListener("click", function () {
+          codexCollapsed = !codexCollapsed;
+          applySidebarPanels();
+        });
+        applySidebarPanels();
+
+        initCodexExpand();
+        initGridUpgradeCostTooltips();
+
+        function updateGridUpgradeUi() {
+          const btn = document.getElementById("grid-upgrade-btn");
+          const detail = document.getElementById("grid-upgrade-detail");
+          if (!btn || !detail) return;
+          if (gridSize >= GRID_MAX_SIZE) {
+            btn.disabled = true;
+            btn.textContent = "밭 최대";
+            detail.innerHTML = "";
+            return;
+          }
+          const nextSide = gridSize + 1;
+          btn.textContent = "밭 확장";
+          btn.disabled = !canAffordGridExpand(nextSide);
+          detail.innerHTML = gridExpandCostHtml(nextSide);
+        }
+
+        function buildGridDom() {
+          const fieldWrap = document.getElementById("field-wrap");
+          const scatterLayer = document.getElementById("grid-scatter-layer");
+          if (!grid || !fieldWrap) return;
+          grid.innerHTML = "";
+          if (scatterLayer) scatterLayer.innerHTML = "";
+          grid.className =
+            "relative z-0 grid gap-0 border-t border-l border-gray-600 " +
+            GRID_COL_CLASS[gridSize] +
+            " " +
+            GRID_ROW_CLASS[gridSize];
+          grid.setAttribute("aria-label", gridSize + "×" + gridSize + " 게임 그리드");
+          const px = gridSize * CELL_PX;
+          fieldWrap.style.width = px + "px";
+          fieldWrap.style.height = px + "px";
+
+          cellElements = [];
+          for (let row = 0; row < gridSize; row++) {
+            cellElements[row] = [];
+            for (let col = 0; col < gridSize; col++) {
+              const index = row * gridSize + col;
+              const cell = document.createElement("div");
+              cell.className = cellClass;
+              cell.dataset.index = String(index);
+              cell.dataset.row = String(row);
+              cell.dataset.col = String(col);
+              cellElements[row][col] = cell;
+              bindCellTooltip(cell, row, col);
+              cell.addEventListener("click", function handleCellClick(e) {
+                const r = Number(cell.dataset.row);
+                const c = Number(cell.dataset.col);
+                const data = GridState.getCell(r, c);
+
+                if (data.type === null) {
+                  e.stopPropagation();
+                  openPlantSelectUI(r, c, cell);
+                  return;
+                }
+
+                if (!data.isReady) return;
+
+                if (data.variant) return;
+
+                const harvested = data.type;
+                GridState.updateCell(r, c, {
+                  type: null,
+                  variant: null,
+                  growthTime: 0,
+                  isReady: false,
+                  plantedAt: null,
+                  matureAt: null,
+                });
+                spawnScatteredHarvestItem(harvested, r, c);
+                if (harvested === "circle") {
+                  const bonus = rollCircleHarvestBonus();
+                  if (bonus === "square") {
+                    spawnScatteredHarvestItem("square", r, c);
+                  } else if (bonus === "circle") {
+                    spawnScatteredHarvestItem("circle", r, c);
+                  } else if (bonus === "circle_green") {
+                    spawnScatteredHarvestItem("circle", r, c, "circle_green");
+                  } else if (bonus === "circle_gold") {
+                    spawnScatteredHarvestItem("circle", r, c, "circle_gold");
+                  }
+                } else if (harvested === "square") {
+                  const sb = rollSquareHarvestBonus();
+                  if (sb === "circle") {
+                    spawnScatteredHarvestItem("circle", r, c);
+                  } else if (sb === "triangle") {
+                    spawnScatteredHarvestItem("triangle", r, c);
+                  } else if (sb === "square_gold") {
+                    spawnScatteredHarvestItem("square", r, c, "square_gold");
+                  }
+                } else if (harvested === "triangle") {
+                  const tb = rollTriangleHarvestBonus();
+                  if (tb === "two_circles") {
+                    spawnScatteredHarvestItem("circle", r, c);
+                    spawnScatteredHarvestItem("circle", r, c);
+                  } else if (tb === "square") {
+                    spawnScatteredHarvestItem("square", r, c);
+                  } else if (tb === "triangle_green") {
+                    spawnScatteredHarvestItem("triangle", r, c, "triangle_green");
+                  }
+                }
+              });
+              grid.appendChild(cell);
+            }
+          }
+        }
+
+        function applyGridExpansion() {
+          if (gridSize >= GRID_MAX_SIZE) return;
+          const nextSide = gridSize + 1;
+          if (!canAffordGridExpand(nextSide)) return;
+          payGridExpandCost(nextSide);
+          const oldCells = GridState.cells;
+          const oldN = gridSize;
+          gridSize = nextSide;
+          const newCells = [];
+          for (let r = 0; r < gridSize; r++) {
+            newCells[r] = [];
+            for (let c = 0; c < gridSize; c++) {
+              if (r < oldN && c < oldN) {
+                newCells[r][c] = Object.assign({}, oldCells[r][c]);
+              } else {
+                newCells[r][c] = createEmptyCell();
+              }
+            }
+          }
+          GridState.cells = newCells;
+          closePlantSelectUI();
+          buildGridDom();
+          renderGrid();
+          renderInventory();
+        }
+
+        document.getElementById("grid-upgrade-btn")?.addEventListener("click", function () {
+          applyGridExpansion();
+        });
+
+        buildGridDom();
+        updateGridUpgradeUi();
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closePlantSelectUI();
+        });
+
+        document.addEventListener("click", function (e) {
+          const panel = document.getElementById("plant-select-panel");
+          if (!panel || panel.classList.contains("hidden")) return;
+          if (panel.contains(e.target)) return;
+          closePlantSelectUI();
+        });
+
+        renderGrid();
+        renderInventory();
+        renderCodex();
+
+        const GROWTH_TICK_MS = 250;
+        setInterval(tickGrowth, GROWTH_TICK_MS);
+
+        window.GridState = GridState;
+        window.playerInventory = playerInventory;
+        window.GRID_EXPAND_COST = GRID_EXPAND_COST;
+
+        console.log("게임 그리드 준비됨:", grid.children.length, "셀");
+      })();
+    </script>
+  </body>
+</html>
